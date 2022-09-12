@@ -18,6 +18,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from ctypes import resize
 import util
 
 class SearchProblem:
@@ -87,15 +88,37 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    # LIFO
+    # LIFO 
+
     # graph search version of DFS, which avoids expanding any already visited states 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))    
     
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = util.Stack()
+    s = problem.getStartState()
+    stack.push(s)
+    visited = []
+    prev = {}
+    prev[s] = []
+    res = []
+    while (not stack.isEmpty()):
+        node = stack.pop()
+        if node in visited:
+            continue
+        visited.append(node)
+        if problem.isGoalState(node):
+            # while prev[s] != None:
+            #     res.append(s)
+            # res.append(s)
+            return prev[node]
+        for x in problem.getSuccessors(node):
+            prev[x[0]] = prev[node].copy()
+            prev[x[0]].append(x[1])
+            stack.push(x[0])
+    return res
+
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
