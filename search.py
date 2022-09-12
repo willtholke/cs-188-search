@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 """
 
 from ctypes import resize
+import queue
 import util
 
 class SearchProblem:
@@ -102,16 +103,12 @@ def depthFirstSearch(problem: SearchProblem):
     visited = []
     prev = {}
     prev[s] = []
-    res = []
     while (not stack.isEmpty()):
         node = stack.pop()
         if node in visited:
             continue
         visited.append(node)
         if problem.isGoalState(node):
-            # while prev[s] != None:
-            #     res.append(s)
-            # res.append(s)
             return prev[node]
         for x in problem.getSuccessors(node):
             prev[x[0]] = prev[node].copy()
@@ -123,8 +120,30 @@ def depthFirstSearch(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    queue = util.Queue()
+    node = problem.getStartState()
+    queue.push(node)
+    visited = []
+    prev = {}
+    prev[node] = []
+    min = None
+    res = []
+    while (not queue.isEmpty()):
+        if (queue.isEmpty()):
+            return util.raiseNotDefined
+        node = queue.pop()
+      
+        visited.append(node)
+        if problem.isGoalState(node):
+            return prev[node]
+        for x in problem.getSuccessors(node):
+            if x[0] in visited:
+                continue
+            visited.append(x[0])
+            prev[x[0]] = prev[node].copy()
+            prev[x[0]].append(x[1])
+            queue.push(x[0])
+    return res
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
