@@ -122,27 +122,27 @@ def breadthFirstSearch(problem: SearchProblem):
     "*** YOUR CODE HERE ***"
     queue = util.Queue()
     node = problem.getStartState()
-    queue.push(node)
-    visited = []
+    queue.push([node, None, None])
+    visited = set()
     prev = {}
     prev[node] = []
     min = None
     res = []
     while (not queue.isEmpty()):
-        if (queue.isEmpty()):
-            return util.raiseNotDefined
-        node = queue.pop()
-      
-        visited.append(node)
+        tup = queue.pop()
+        node = tup[0]
+        pare = tup[1]
+        dire = tup[2]
+        if node in visited:
+            continue
+        if pare != None:
+            prev[node] = prev[pare].copy()
+            prev[node].append(dire)
+        visited.add(node)
         if problem.isGoalState(node):
             return prev[node]
         for x in problem.getSuccessors(node):
-            if x[0] in visited:
-                continue
-            visited.append(x[0])
-            prev[x[0]] = prev[node].copy()
-            prev[x[0]].append(x[1])
-            queue.push(x[0])
+            queue.push([x[0], node, x[1]])
     return res
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
@@ -160,9 +160,9 @@ def uniformCostSearch(problem: SearchProblem):
         if (queue.isEmpty()):
             return util.raiseNotDefined
         node = queue.pop()
-        # if node in visited:
-        #     continue
-        # visited.append(node)
+        if node in visited:
+            continue
+        visited.append(node)
         if problem.isGoalState(node):
             return prev[node]
         for x in problem.getSuccessors(node):
@@ -172,8 +172,6 @@ def uniformCostSearch(problem: SearchProblem):
                     queue.update(x[0], priority[x[0]])
                     prev[x[0]] = prev[node].copy()
                     prev[x[0]].append(x[1])
-
-
             else: 
                 priority[x[0]] = priority[node] + x[2]
                 queue.push(x[0], priority[x[0]])
@@ -216,30 +214,38 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    queue = util.PriorityQueueWithFunction(heuristic)
+    queue = util.PriorityQueue()
     node = problem.getStartState()
-    queue.push(node)
-    visited = []
+    queue.push([node, None, None, 0], 0)
+    visited = set()
     prev = {}
     prev[node] = []
-    min = None
     res = []
+    priority = {}
+    priority[node] = 0
     while (not queue.isEmpty()):
-        if (queue.isEmpty()):
-            return util.raiseNotDefined
-        node = queue.pop()
-      
-        visited.append(node)
+        tup = queue.pop()
+        node = tup[0]
+        pare = tup[1]
+        dire = tup[2]
+        cost = tup[3]
+        if node in visited:
+            continue
+        if pare != None:
+            prev[node] = prev[pare].copy()
+            prev[node].append(dire)
+            priority[node] = priority[pare] + cost
+        visited.add(node)
         if problem.isGoalState(node):
             return prev[node]
         for x in problem.getSuccessors(node):
-            if x[0] in visited:
-                continue
-            visited.append(x[0])
-            prev[x[0]] = prev[node].copy()
-            prev[x[0]].append(x[1])
-            queue.push(x[0])
-    return res
+            queue.push([x[0], node, x[1], x[2]], priority[node] + x[2] + heuristic(x[0], problem))
+    return None
+
+class Node:
+    def __init__(self):
+        self.true_cost = 0
+        self.parent = None
 
 # Abbreviations
 bfs = breadthFirstSearch
