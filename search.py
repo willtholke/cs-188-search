@@ -91,70 +91,49 @@ def depthFirstSearch(problem: SearchProblem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     stack, s = util.Stack(), problem.getStartState()
-    visited, prev, prev[s] = [], {}, []
+    visited, prev, prev[s] = set(), {}, []
     stack.push(s)
     while (not stack.isEmpty()):
         node = stack.pop()
         if problem.isGoalState(node):
             return prev[node]
         if node not in visited:
-            visited.append(node)
+            visited.add(node)
             for x in problem.getSuccessors(node):
                 successor, action = x[0], x[1]
                 prev[successor] = prev[node].copy()
                 prev[successor].append(action)
                 stack.push(successor)
-    return res
-
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    queue = util.Queue()
-    node = problem.getStartState()
+    queue, node = util.Queue(), problem.getStartState()
+    visited, prev, prev[node] = set(), {}, []
     queue.push([node, None, None])
-    visited = set()
-    prev = {}
-    prev[node] = []
-    min = None
-    res = []
     while (not queue.isEmpty()):
         tup = queue.pop()
-        node = tup[0]
-        pare = tup[1]
-        dire = tup[2]
-        if node in visited:
-            continue
-        if pare != None:
-            prev[node] = prev[pare].copy()
-            prev[node].append(dire)
-        visited.add(node)
-        if problem.isGoalState(node):
-            return prev[node]
-        for x in problem.getSuccessors(node):
-            queue.push([x[0], node, x[1]])
-    return res
+        node, pare, dire = tup[0], tup[1], tup[2]
+        if node not in visited:
+            visited.add(node)
+            if pare:
+                prev[node] = prev[pare].copy()
+                prev[node].append(dire)
+            if problem.isGoalState(node):
+                return prev[node]
+            for x in problem.getSuccessors(node):
+                queue.push([x[0], node, x[1]])
+  
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    queue = util.PriorityQueue()
-    node = problem.getStartState()
+    queue, node = util.PriorityQueue(), problem.getStartState()
+    visited, prev, priority = set(), {}, {}
+    prev[node], priority[node] = [], 0
     queue.push(node, 0)
-    visited = []
-    prev = {}
-    priority = {}
-    prev[node] = []
-    priority[node] = 0
-    
     while (not queue.isEmpty()):
-        if (queue.isEmpty()):
-            return util.raiseNotDefined
         node = queue.pop()
-        if node in visited:
-            continue
-        visited.append(node)
         if problem.isGoalState(node):
             return prev[node]
+        visited.add(node)
         for x in problem.getSuccessors(node):
             if x[0] in priority:
                 if priority[x[0]] > priority[node] + x[2]:
@@ -168,8 +147,7 @@ def uniformCostSearch(problem: SearchProblem):
                 prev[x[0]] = prev[node].copy()
                 prev[x[0]].append(x[1])
 
-
-        #visited.append(node)
+    #visited.append(node)
     # while (not queue.isEmpty()):
     #     node = queue.pop()
     #     visited.append(node)
@@ -192,7 +170,6 @@ def uniformCostSearch(problem: SearchProblem):
     #         #priority[x[0]] = priority[node] + x[2]
     #         prev[(x[0], priority[x[0]])].append(x[1])
     #         queue.update(x[0], priority[x[0]])
-    return res
 
 def nullHeuristic(state, problem=None):
     """
@@ -203,34 +180,23 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    queue = util.PriorityQueue()
-    node = problem.getStartState()
+    queue, node = util.PriorityQueue(), problem.getStartState()
+    visited, prev, priority = set(), {}, {}
+    prev[node], priority[node] = [], 0
     queue.push([node, None, None, 0], 0)
-    visited = set()
-    prev = {}
-    prev[node] = []
-    res = []
-    priority = {}
-    priority[node] = 0
     while (not queue.isEmpty()):
         tup = queue.pop()
-        node = tup[0]
-        pare = tup[1]
-        dire = tup[2]
-        cost = tup[3]
-        if node in visited:
-            continue
-        if pare != None:
-            prev[node] = prev[pare].copy()
-            prev[node].append(dire)
-            priority[node] = priority[pare] + cost
-        visited.add(node)
-        if problem.isGoalState(node):
-            return prev[node]
-        for x in problem.getSuccessors(node):
-            queue.push([x[0], node, x[1], x[2]], priority[node] + x[2] + heuristic(x[0], problem))
-    return None
+        node, pare, dire, cost = tup[0], tup[1], tup[2], tup[3]
+        if node not in visited:
+            visited.add(node)
+            if pare != None:
+                prev[node] = prev[pare].copy()
+                prev[node].append(dire)
+                priority[node] = priority[pare] + cost
+            if problem.isGoalState(node):
+                return prev[node]
+            for x in problem.getSuccessors(node):
+                queue.push([x[0], node, x[1], x[2]], priority[node] + x[2] + heuristic(x[0], problem))
 
 class Node:
     def __init__(self):
