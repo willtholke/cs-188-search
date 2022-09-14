@@ -80,7 +80,8 @@ def depthFirstSearch(problem: SearchProblem):
     Search the deepest nodes in the search tree first.
 
     Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
+    goal. Make sure to implement a graph search algorithm. Avoids expanding
+    any already visited states. Stack implements LIFO.
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
@@ -89,31 +90,20 @@ def depthFirstSearch(problem: SearchProblem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    # LIFO 
-
-    # graph search version of DFS, which avoids expanding any already visited states 
-    # print("Start:", problem.getStartState())
-    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))    
-    
-    "*** YOUR CODE HERE ***"
-    stack = util.Stack()
-    s = problem.getStartState()
+    stack, s = util.Stack(), problem.getStartState()
+    visited, prev, prev[s] = [], {}, []
     stack.push(s)
-    visited = []
-    prev = {}
-    prev[s] = []
     while (not stack.isEmpty()):
         node = stack.pop()
-        if node in visited:
-            continue
-        visited.append(node)
         if problem.isGoalState(node):
             return prev[node]
-        for x in problem.getSuccessors(node):
-            prev[x[0]] = prev[node].copy()
-            prev[x[0]].append(x[1])
-            stack.push(x[0])
+        if node not in visited:
+            visited.append(node)
+            for x in problem.getSuccessors(node):
+                successor, action = x[0], x[1]
+                prev[successor] = prev[node].copy()
+                prev[successor].append(action)
+                stack.push(successor)
     return res
 
 
